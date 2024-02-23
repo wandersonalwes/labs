@@ -1,4 +1,4 @@
-import { normalizeString } from '../normalize-string/normalize-string'
+import { normalizeString } from '../normalize-string'
 
 export const formatMoney = (valueInCents: number) => {
   const value = valueInCents / 100
