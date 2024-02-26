@@ -1,5 +1,8 @@
 'use client'
 
+import Link from 'next/link'
+import { useState, useTransition } from 'react'
+
 import { GoogleIcon } from '@/icons'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -22,30 +25,39 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 
+import { Alert, AlertDescription } from '@/components/ui/alert'
+
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import Link from 'next/link'
+import { LoginSchema } from '@/schemas/login-schema'
 
-const loginSchema = z.object({
-  email: z.string().email('E-mail inválido'),
-  password: z
-    .string()
-    .min(8, 'A senha deve conter pelo menos 8 caracteres')
-    .max(20, 'A senha deve conter no máximo 20 caracteres'),
-})
+import { login } from '@/actions/login'
+import { CheckCircledIcon } from '@radix-ui/react-icons'
 
 export default function LoginPage() {
-  const form = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
+  const [error, setError] = useState<string | null | undefined>()
+  const [success, setSuccess] = useState<string | null | undefined>('')
+  const [isPending, startTransition] = useTransition()
+
+  const form = useForm<z.infer<typeof LoginSchema>>({
+    resolver: zodResolver(LoginSchema),
     defaultValues: {
       email: '',
       password: '',
     },
   })
 
-  function onSubmit(values: z.infer<typeof loginSchema>) {
-    console.log(values)
+  function onSubmit(values: z.infer<typeof LoginSchema>) {
+    setError(null)
+    setSuccess(null)
+
+    startTransition(() => {
+      login(values).then((data) => {
+        setError(data.error)
+        setSuccess(data.success)
+      })
+    })
   }
 
   return (
@@ -57,7 +69,7 @@ export default function LoginPage() {
             <CardDescription>Bem vindo de volta!</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
-            <Button variant="outline" className="gap-3">
+            <Button variant="outline" className="gap-3" disabled={isPending}>
               <GoogleIcon className="size-4" />
               Google
             </Button>
@@ -80,7 +92,11 @@ export default function LoginPage() {
                 <FormItem>
                   <FormLabel>E-mail</FormLabel>
                   <FormControl>
-                    <Input placeholder="john.doe@mail.com" {...field} />
+                    <Input
+                      placeholder="john.doe@mail.com"
+                      disabled={isPending}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -94,7 +110,12 @@ export default function LoginPage() {
                 <FormItem>
                   <FormLabel>Senha</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="********" {...field} />
+                    <Input
+                      type="password"
+                      placeholder="********"
+                      disabled={isPending}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -102,7 +123,23 @@ export default function LoginPage() {
             />
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
-            <Button className="w-full">Entrar</Button>
+            {error && (
+              <Alert variant="destructive">
+                <CheckCircledIcon className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {success && (
+              <Alert>
+                <CheckCircledIcon className="h-4 w-4" />
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            )}
+
+            <Button className="w-full" disabled={isPending}>
+              Entrar
+            </Button>
 
             <span className="text-center text-muted-foreground block">
               Ainda não tem uma conta?{' '}

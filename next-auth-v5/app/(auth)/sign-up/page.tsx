@@ -1,5 +1,8 @@
 'use client'
 
+import Link from 'next/link'
+import { useState, useTransition } from 'react'
+
 import { GoogleIcon } from '@/icons'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -22,30 +25,40 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 
+import { Alert, AlertDescription } from '@/components/ui/alert'
+
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import Link from 'next/link'
+import { SignUpSchema } from '@/schemas/sign-up-schema'
 
-const signUpSchema = z.object({
-  email: z.string().email('E-mail inválido'),
-  password: z
-    .string()
-    .min(8, 'A senha deve conter pelo menos 8 caracteres')
-    .max(20, 'A senha deve conter no máximo 20 caracteres'),
-})
+import { signUp } from '@/actions/sign-up'
+import { CheckCircledIcon } from '@radix-ui/react-icons'
 
 export default function SignUpPage() {
-  const form = useForm<z.infer<typeof signUpSchema>>({
-    resolver: zodResolver(signUpSchema),
+  const [error, setError] = useState<string | null | undefined>()
+  const [success, setSuccess] = useState<string | null | undefined>('')
+  const [isPending, startTransition] = useTransition()
+
+  const form = useForm<z.infer<typeof SignUpSchema>>({
+    resolver: zodResolver(SignUpSchema),
     defaultValues: {
+      name: '',
       email: '',
       password: '',
     },
   })
 
-  function onSubmit(values: z.infer<typeof signUpSchema>) {
-    console.log(values)
+  function onSubmit(values: z.infer<typeof SignUpSchema>) {
+    setError(null)
+    setSuccess(null)
+
+    startTransition(() => {
+      signUp(values).then((data) => {
+        setError(data.error)
+        setSuccess(data.success)
+      })
+    })
   }
 
   return (
@@ -77,6 +90,20 @@ export default function SignUpPage() {
 
             <FormField
               control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome</FormLabel>
+                  <FormControl>
+                    <Input placeholder="John Doe" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
@@ -104,6 +131,20 @@ export default function SignUpPage() {
             />
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
+            {error && (
+              <Alert variant="destructive">
+                <CheckCircledIcon className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {success && (
+              <Alert>
+                <CheckCircledIcon className="h-4 w-4" />
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            )}
+
             <Button className="w-full">Criar conta</Button>
 
             <span className="text-center text-muted-foreground block">
