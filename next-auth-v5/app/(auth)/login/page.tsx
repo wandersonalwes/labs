@@ -33,7 +33,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { LoginSchema } from '@/schemas/login-schema'
 
 import { login } from '@/actions/login'
-import { CheckCircledIcon } from '@radix-ui/react-icons'
+import {
+  CheckCircledIcon,
+  ExclamationTriangleIcon,
+} from '@radix-ui/react-icons'
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null | undefined>()
@@ -54,8 +57,8 @@ export default function LoginPage() {
 
     startTransition(() => {
       login(values).then((data) => {
-        setError(data.error)
-        setSuccess(data.success)
+        setError(data?.error)
+        setSuccess(data?.success)
       })
     })
   }
@@ -125,7 +128,7 @@ export default function LoginPage() {
           <CardFooter className="flex flex-col gap-4">
             {error && (
               <Alert variant="destructive">
-                <CheckCircledIcon className="h-4 w-4" />
+                <ExclamationTriangleIcon className="h-4 w-4" />
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}

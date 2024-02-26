@@ -33,7 +33,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { SignUpSchema } from '@/schemas/sign-up-schema'
 
 import { signUp } from '@/actions/sign-up'
-import { CheckCircledIcon } from '@radix-ui/react-icons'
+import {
+  CheckCircledIcon,
+  ExclamationTriangleIcon,
+} from '@radix-ui/react-icons'
 
 export default function SignUpPage() {
   const [error, setError] = useState<string | null | undefined>()
@@ -133,7 +136,7 @@ export default function SignUpPage() {
           <CardFooter className="flex flex-col gap-4">
             {error && (
               <Alert variant="destructive">
-                <CheckCircledIcon className="h-4 w-4" />
+                <ExclamationTriangleIcon className="h-4 w-4" />
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
