@@ -1,7 +1,10 @@
 import type { NextAuthConfig } from 'next-auth'
+
+import Google from 'next-auth/providers/google'
 import Credentials from 'next-auth/providers/credentials'
-import { LoginSchema } from './schemas/login-schema'
+
 import { getUserByEmail } from './data/user'
+import { LoginSchema } from './schemas/login-schema'
 
 import bcrypt from 'bcryptjs'
 
@@ -25,6 +28,10 @@ export default {
 
         return user
       },
+    }),
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
 } satisfies NextAuthConfig

@@ -3,9 +3,9 @@
 import Link from 'next/link'
 import { useState, useTransition } from 'react'
 
-import { GoogleIcon } from '@/icons'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { GoogleButton } from '@/components/auth/google-button'
 
 import {
   Card,
@@ -30,36 +30,35 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { SignUpSchema } from '@/schemas/sign-up-schema'
+import { LoginSchema } from '@/schemas/login-schema'
 
-import { signUp } from '@/actions/sign-up'
+import { login } from '@/actions/login'
 import {
   CheckCircledIcon,
   ExclamationTriangleIcon,
 } from '@radix-ui/react-icons'
 
-export default function SignUpPage() {
+export default function LoginPage() {
   const [error, setError] = useState<string | null | undefined>()
   const [success, setSuccess] = useState<string | null | undefined>('')
   const [isPending, startTransition] = useTransition()
 
-  const form = useForm<z.infer<typeof SignUpSchema>>({
-    resolver: zodResolver(SignUpSchema),
+  const form = useForm<z.infer<typeof LoginSchema>>({
+    resolver: zodResolver(LoginSchema),
     defaultValues: {
-      name: '',
       email: '',
       password: '',
     },
   })
 
-  function onSubmit(values: z.infer<typeof SignUpSchema>) {
+  function onSubmit(values: z.infer<typeof LoginSchema>) {
     setError(null)
     setSuccess(null)
 
     startTransition(() => {
-      signUp(values).then((data) => {
-        setError(data.error)
-        setSuccess(data.success)
+      login(values).then((data) => {
+        setError(data?.error)
+        setSuccess(data?.success)
       })
     })
   }
@@ -69,16 +68,11 @@ export default function SignUpPage() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full max-w-sm">
         <Card>
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl">Criar conta</CardTitle>
-            <CardDescription>
-              Digite seu e-mail abaixo para criar sua conta
-            </CardDescription>
+            <CardTitle className="text-2xl">Entrar</CardTitle>
+            <CardDescription>Bem vindo de volta!</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
-            <Button variant="outline" className="gap-3">
-              <GoogleIcon className="size-4" />
-              Google
-            </Button>
+            <GoogleButton />
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -93,26 +87,16 @@ export default function SignUpPage() {
 
             <FormField
               control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome</FormLabel>
-                  <FormControl>
-                    <Input placeholder="John Doe" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>E-mail</FormLabel>
                   <FormControl>
-                    <Input placeholder="john.doe@mail.com" {...field} />
+                    <Input
+                      placeholder="john.doe@mail.com"
+                      disabled={isPending}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -126,7 +110,12 @@ export default function SignUpPage() {
                 <FormItem>
                   <FormLabel>Senha</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="********" {...field} />
+                    <Input
+                      type="password"
+                      placeholder="********"
+                      disabled={isPending}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -148,15 +137,17 @@ export default function SignUpPage() {
               </Alert>
             )}
 
-            <Button className="w-full">Criar conta</Button>
+            <Button className="w-full" disabled={isPending}>
+              Entrar
+            </Button>
 
             <span className="text-center text-muted-foreground block">
-              Já tem uma conta?{' '}
+              Ainda não tem uma conta?{' '}
               <Link
-                href="/login"
+                href="/auth/sign-up"
                 className="hover:underline text-foreground/80 hover:text-white font-medium"
               >
-                Entrar
+                Criar conta
               </Link>
             </span>
           </CardFooter>

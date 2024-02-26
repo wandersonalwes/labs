@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { useState, useTransition } from 'react'
 
-import { GoogleIcon } from '@/icons'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
@@ -30,35 +29,37 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { LoginSchema } from '@/schemas/login-schema'
+import { SignUpSchema } from '@/schemas/sign-up-schema'
 
-import { login } from '@/actions/login'
+import { signUp } from '@/actions/sign-up'
 import {
   CheckCircledIcon,
   ExclamationTriangleIcon,
 } from '@radix-ui/react-icons'
+import { GoogleButton } from '@/components/auth/google-button'
 
-export default function LoginPage() {
+export default function SignUpPage() {
   const [error, setError] = useState<string | null | undefined>()
   const [success, setSuccess] = useState<string | null | undefined>('')
   const [isPending, startTransition] = useTransition()
 
-  const form = useForm<z.infer<typeof LoginSchema>>({
-    resolver: zodResolver(LoginSchema),
+  const form = useForm<z.infer<typeof SignUpSchema>>({
+    resolver: zodResolver(SignUpSchema),
     defaultValues: {
+      name: '',
       email: '',
       password: '',
     },
   })
 
-  function onSubmit(values: z.infer<typeof LoginSchema>) {
+  function onSubmit(values: z.infer<typeof SignUpSchema>) {
     setError(null)
     setSuccess(null)
 
     startTransition(() => {
-      login(values).then((data) => {
-        setError(data?.error)
-        setSuccess(data?.success)
+      signUp(values).then((data) => {
+        setError(data.error)
+        setSuccess(data.success)
       })
     })
   }
@@ -68,14 +69,13 @@ export default function LoginPage() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full max-w-sm">
         <Card>
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl">Entrar</CardTitle>
-            <CardDescription>Bem vindo de volta!</CardDescription>
+            <CardTitle className="text-2xl">Criar conta</CardTitle>
+            <CardDescription>
+              Digite seu e-mail abaixo para criar sua conta
+            </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
-            <Button variant="outline" className="gap-3" disabled={isPending}>
-              <GoogleIcon className="size-4" />
-              Google
-            </Button>
+            <GoogleButton />
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -90,16 +90,26 @@ export default function LoginPage() {
 
             <FormField
               control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome</FormLabel>
+                  <FormControl>
+                    <Input placeholder="John Doe" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>E-mail</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="john.doe@mail.com"
-                      disabled={isPending}
-                      {...field}
-                    />
+                    <Input placeholder="john.doe@mail.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -113,12 +123,7 @@ export default function LoginPage() {
                 <FormItem>
                   <FormLabel>Senha</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="********"
-                      disabled={isPending}
-                      {...field}
-                    />
+                    <Input type="password" placeholder="********" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -140,17 +145,15 @@ export default function LoginPage() {
               </Alert>
             )}
 
-            <Button className="w-full" disabled={isPending}>
-              Entrar
-            </Button>
+            <Button className="w-full">Criar conta</Button>
 
             <span className="text-center text-muted-foreground block">
-              Ainda não tem uma conta?{' '}
+              Já tem uma conta?{' '}
               <Link
-                href="/sign-up"
+                href="/auth/login"
                 className="hover:underline text-foreground/80 hover:text-white font-medium"
               >
-                Criar conta
+                Entrar
               </Link>
             </span>
           </CardFooter>

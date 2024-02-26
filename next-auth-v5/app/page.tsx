@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <main>
       <h1>Next Auth v5</h1>
-      <Link href="/login" className={buttonVariants()}>
+      <Link href="/auth/login" className={buttonVariants()}>
         Entrar
       </Link>
     </main>
