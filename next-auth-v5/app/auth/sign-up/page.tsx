@@ -145,7 +145,9 @@ export default function SignUpPage() {
               </Alert>
             )}
 
-            <Button className="w-full">Criar conta</Button>
+            <Button className="w-full" disabled={isPending}>
+              Criar conta
+            </Button>
 
             <span className="text-center text-muted-foreground block">
               Já tem uma conta?{' '}
